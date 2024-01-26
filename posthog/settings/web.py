@@ -239,6 +239,14 @@ CORS_ALLOW_HEADERS = default_headers + CORS_ALLOWED_TRACING_HEADERS
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour'
+    },
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "posthog.auth.PersonalAPIKeyAuthentication",
         "rest_framework.authentication.BasicAuthentication",
