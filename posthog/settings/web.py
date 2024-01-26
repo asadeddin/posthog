@@ -247,7 +247,6 @@ REST_FRAMEWORK = {
         'anon': '100/hour',
         'user': '1000/hour'
     },
-}
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "posthog.auth.PersonalAPIKeyAuthentication",
         "rest_framework.authentication.BasicAuthentication",
