@@ -433,7 +433,7 @@ class PluginConfigAdmin(admin.ModelAdmin):
     inlines = [PluginAttachmentInline]
 
     def plugin_name(self, config: PluginConfig):
-        return format_html(f"{config.plugin.name} ({config.plugin_id})")
+        return format_html("{} ({})", config.plugin.name, config.plugin_id)
 
     def team_name(self, config: PluginConfig):
         return format_html(f"{config.team.name} ({config.team_id})")
