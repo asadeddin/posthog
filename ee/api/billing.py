@@ -1,3 +1,4 @@
+from django.utils.http import is_safe_url
 from typing import Any, Optional
 
 import posthoganalytics
@@ -114,6 +115,9 @@ class BillingViewset(viewsets.GenericViewSet):
         if license:
             billing_service_token = build_billing_token(license, organization)
             url = f"{url}&token={billing_service_token}"
+
+        if not is_safe_url(url, allowed_hosts={request.get_host()}):
+            raise ValidationError("Unsafe redirect detected.")
 
         return redirect(url)
 
