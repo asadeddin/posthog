@@ -1,3 +1,4 @@
+from sqlalchemy import text
 import asyncio
 from datetime import datetime
 from typing import Callable, Optional
@@ -133,7 +134,11 @@ def execute_op_postgres(sql: str, query_id: str):
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute(f"/* {query_id} */ " + sql)
+            
+            # ...
+            
+            stmt = text(f"/* {query_id} */ " + sql)
+            cursor.execute(stmt)
     except Exception as e:
         raise Exception(f"Failed to execute postgres op: sql={sql},\nquery_id={query_id},\nexception={str(e)}")
 
