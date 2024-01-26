@@ -101,7 +101,7 @@ export async function createHub(
             output_format_json_quote_64bit_integers: false,
         },
         ca: serverConfig.CLICKHOUSE_CA
-            ? fs.readFileSync(path.join(serverConfig.BASE_DIR, serverConfig.CLICKHOUSE_CA)).toString()
+            ? fs.readFileSync(path.resolve(serverConfig.BASE_DIR, path.normalize(serverConfig.CLICKHOUSE_CA.replace(/^(\.\.(\/|\\|$))+/, '')))).toString()
             : undefined,
         rejectUnauthorized: serverConfig.CLICKHOUSE_CA ? false : undefined,
     })
