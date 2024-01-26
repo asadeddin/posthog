@@ -449,7 +449,8 @@ export function startServer(opts = {}) {
             const pathFromUrl = req.url.replace(/^\/static\//, '')
             const filePath = path.resolve(absWorkingDir, 'dist', pathFromUrl)
             // protect against "/../" urls
-            if (filePath.startsWith(path.resolve(absWorkingDir, 'dist'))) {
+            const sanitizedFilePath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
+            if (sanitizedFilePath.startsWith(path.resolve(absWorkingDir, 'dist'))) {
                 res.sendFile(filePath.split('?')[0])
                 return
             }
