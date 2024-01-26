@@ -608,7 +608,7 @@ class OrganizationAdmin(admin.ModelAdmin):
     def first_member(self, organization: Organization):
         user = organization.members.order_by("id").first()
         return (
-            format_html(f'<a href="/admin/posthog/user/{user.pk}/change/">{user.email}</a>')
+            format_html('<a href="/admin/posthog/user/{}/change/">{}</a>', user.pk, user.email)
             if user is not None
             else "None"
         )
