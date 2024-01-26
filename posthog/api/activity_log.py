@@ -182,29 +182,24 @@ class ActivityLogViewSet(StructuredViewSetMixin, viewsets.GenericViewSet, mixins
             # before we filter to include only the important changes,
             # we need to deduplicate too frequent changes
             # we only really need to do this on notebooks
-            deduplicated_notebook_activity_ids_query = ActivityLog.objects.raw(
-                f"""
-                SELECT id
-                FROM (SELECT
-                        Row_number() over (
-                            PARTITION BY five_minute_window, activity, item_id, scope ORDER BY created_at DESC
-                        ) AS row_number,
-                        *
-                        FROM (
-                            -- copied from https://stackoverflow.com/a/43028800
-                            SELECT to_timestamp(floor(Extract(epoch FROM created_at) / extract(epoch FROM interval '5 min')) *
-                                                extract(epoch FROM interval '5 min')) AS five_minute_window,
-                                   activity, item_id, scope, id, created_at
-                            FROM posthog_activitylog
-                            WHERE team_id = {self.team_id}
-                            -- we only really care about de-duplicating Notebook changes,
-                            -- as multiple actual activities are logged for one logical activity
-                            AND scope = 'Notebook'
-                            AND NOT (user_id = {user.pk} AND user_id IS NOT NULL)
-                            {last_read_filter}
-                            ORDER BY created_at DESC) AS inner_q) AS counted_q
-                WHERE row_number = 1
-                """
+            deduplicated_notebook_activity_ids_query = ActivityLog.objects.filter(
+                team_id=self.team_id,
+                scope='Notebook'
+            ).exclude(
+                user_id=user.pk
+            ).order_by(
+                '-created_at'
+            ).values(
+                'id', 'activity', 'item_id', 'scope', 'created_at'
+            ).annotate(
+                five_minute_window=ExpressionWrapper(
+                    F('created_at') - F('created_at') % timedelta(minutes=5),
+                    output_field=DateTimeField()
+                )
+            ).order_by(
+                'five_minute_window', 'activity', 'item_id', 'scope', '-created_at'
+            ).distinct(
+                'five_minute_window', 'activity', 'item_id', 'scope'
             )
             deduplicated_notebook_activity_ids = [c.id for c in deduplicated_notebook_activity_ids_query]
 
